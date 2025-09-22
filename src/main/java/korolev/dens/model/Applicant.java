@@ -9,10 +9,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Applicant {
 
-    private long applicantId;
+    private int applicantId;
     private PersonContacts contacts;
     private EntranceTest entranceTest;
     private int pintsNumber;
-    private double previousEducationAverageScore;
+    private float previousEducationAverageScore;
 
 }

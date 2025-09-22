@@ -21,4 +21,17 @@ public class EducationalProgram {
 
     private List<Applicant> applicants;
 
+    @Override
+    public String toString() {
+        return "EducationalProgram{" +
+                "title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", educationLevel=" + educationLevel +
+                ", budgetPlacesNumber=" + budgetPlacesNumber +
+                ", contractPlacesNumber=" + contractPlacesNumber +
+                ", contractCost=" + contractCost +
+                ", minimumPassingScore=" + minimumPassingScore +
+                ", applicants (count)=" + applicants.size() +
+                '}';
+    }
 }
