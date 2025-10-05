@@ -22,7 +22,7 @@ public class Main {
 
     static void main() {
 
-        List<AdmissionCompany> admissionCompanies = AdmissionCompanyGenerator.generate(LARGE_COLLECTION_SIZE);
+        List<AdmissionCompany> admissionCompanies = AdmissionCompanyGenerator.generate(SMALL_COLLECTION_SIZE);
 
         Map<Integer, Double> results;
         long startTime;
