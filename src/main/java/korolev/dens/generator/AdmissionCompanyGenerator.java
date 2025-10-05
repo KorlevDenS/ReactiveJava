@@ -9,10 +9,11 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SplittableRandom;
+import java.util.stream.IntStream;
 
 public class AdmissionCompanyGenerator {
 
-    private static final int MAX_PROGRAMS_IN_COMPANY = 80;
+    private static final int MAX_PROGRAMS_IN_COMPANY = 30;
 
     private static final SplittableRandom rnd = new SplittableRandom();
 
@@ -20,8 +21,9 @@ public class AdmissionCompanyGenerator {
 
     public static AdmissionCompany generate() {
         String universityName = RandVals.university();
-        LocalDate startDate = RandVals.juneDay();
-        LocalDate endDate = RandVals.augustDay();
+        RandVals.Period period = RandVals.period();
+        LocalDate startDate = period.juneDay();
+        LocalDate endDate = period.augustDay();
         EducationLevel educationLevel = EducationLevel.values()[rnd.nextInt(EducationLevel.values().length)];
         AdmissionCommission commission = AdmissionCommissionGenerator.generate();
         int programsNum = 1 + rnd.nextInt(MAX_PROGRAMS_IN_COMPANY);
@@ -31,6 +33,13 @@ public class AdmissionCompanyGenerator {
         }
         return new AdmissionCompany(startDate.getYear(), universityName, startDate, endDate, educationLevel,
                 commission, educationalPrograms);
+    }
+
+    public static List<AdmissionCompany> generate(int amount) {
+        List<AdmissionCompany> admissionCompanies;
+        admissionCompanies = IntStream.range(0, amount)
+                .parallel().mapToObj((_) -> generate()).toList();
+        return admissionCompanies;
     }
 
 }

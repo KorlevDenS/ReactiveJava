@@ -12,7 +12,7 @@ public class Applicant {
     private int applicantId;
     private PersonContacts contacts;
     private EntranceTest entranceTest;
-    private int pintsNumber;
+    private int pointsNumber;
     private float previousEducationAverageScore;
 
 }

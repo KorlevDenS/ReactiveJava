@@ -36,7 +36,7 @@ public class ApplicantGenerator {
                 entranceTest == EntranceTest.SOCIAL_BENEFIT ||
                 entranceTest == EntranceTest.RECOMMENDATION_LETTER
         ) {
-            pintsNumber = 100 + rnd.nextInt(11);
+            pintsNumber = 40 + rnd.nextInt(11);
         } else {
             pintsNumber = rnd.nextInt(111);
         }

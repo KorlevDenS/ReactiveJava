@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.SplittableRandom;
 
@@ -37,21 +38,27 @@ public class RandVals {
     private static List<LocalDate> genJuneDays() {
         List<LocalDate> juneDays = new ArrayList<>();
         for (int year = 2000; year <= 2025; year++) {
+            List<LocalDate> yearDays = new ArrayList<>();
             for (int day = 1; day <= 30; day++) {
-                juneDays.add(LocalDate.of(year, 6, day));
+                yearDays.add(LocalDate.of(year, 6, day));
             }
+            Collections.shuffle(yearDays);
+            juneDays.addAll(yearDays);
         }
         return juneDays;
     }
 
     private static List<LocalDate> genAugustDays() {
-        List<LocalDate> juneDays = new ArrayList<>();
+        List<LocalDate> augustDays = new ArrayList<>();
         for (int year = 2000; year <= 2025; year++) {
-            for (int day = 1; day <= 31; day++) {
-                juneDays.add(LocalDate.of(year, 8, day));
+            List<LocalDate> yearDays = new ArrayList<>();
+            for (int day = 1; day <= 30; day++) {
+                yearDays.add(LocalDate.of(year, 8, day));
             }
+            Collections.shuffle(yearDays);
+            augustDays.addAll(yearDays);
         }
-        return juneDays;
+        return augustDays;
     }
 
     private static List<String> genUniversities() {
@@ -168,11 +175,10 @@ public class RandVals {
         return programDescriptions.get(index);
     }
 
-    public static LocalDate juneDay() {
-        return juneDays.get(rnd.nextInt(juneDays.size()));
-    }
+    public record Period(LocalDate juneDay, LocalDate augustDay) {}
 
-    public static LocalDate augustDay() {
-        return augustDays.get(rnd.nextInt(augustDays.size()));
+    public static Period period() {
+        int index = rnd.nextInt(juneDays.size());
+        return new Period(juneDays.get(index), augustDays.get(index));
     }
 }
