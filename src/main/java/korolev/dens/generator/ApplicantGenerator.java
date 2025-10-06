@@ -29,19 +29,27 @@ public class ApplicantGenerator {
     private static Applicant create() {
         int applicantId = 10_000_000 + rnd.nextInt(90_000_000);
         PersonContacts contacts = PersonContactsGenerator.generate();
-        EntranceTest entranceTest = EntranceTest.values()[rnd.nextInt(EntranceTest.values().length)];
-        int pintsNumber;
+        EntranceTest entranceTest;
+        int chance =  rnd.nextInt(100);
+        if (chance < 80) {
+            entranceTest = EntranceTest.values()[rnd.nextInt(2)];
+        } else if (chance < 97) {
+            entranceTest = EntranceTest.PORTFOLIO;
+        } else {
+            entranceTest = EntranceTest.values()[3 + rnd.nextInt(3)];
+        }
+        int pointsNumber;
         if (
                 entranceTest == EntranceTest.OLYMPIAD ||
                 entranceTest == EntranceTest.SOCIAL_BENEFIT ||
                 entranceTest == EntranceTest.RECOMMENDATION_LETTER
         ) {
-            pintsNumber = 40 + rnd.nextInt(11);
+            pointsNumber = 85 + rnd.nextInt(26);
         } else {
-            pintsNumber = rnd.nextInt(111);
+            pointsNumber = rnd.nextInt(101);
         }
         float previousEducationAverageScore = 3.0F + rnd.nextFloat(2.0F);
-        return new Applicant(applicantId, contacts, entranceTest, pintsNumber, previousEducationAverageScore);
+        return new Applicant(applicantId, contacts, entranceTest, pointsNumber, previousEducationAverageScore);
     }
 
     public static Applicant generate() {

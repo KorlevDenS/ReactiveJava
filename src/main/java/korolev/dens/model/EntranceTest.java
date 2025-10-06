@@ -7,8 +7,8 @@ public enum EntranceTest {
 
     ENTRANCE_EXAM("Entrance exam"),
     STATE_EXAM("State exam"),
-    OLYMPIAD("Olympiad"),
     PORTFOLIO("Portfolio"),
+    OLYMPIAD("Olympiad"),
     SOCIAL_BENEFIT("Social Benefit"),
     RECOMMENDATION_LETTER("Recommendation letter");
 

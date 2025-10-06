@@ -3,7 +3,12 @@ package korolev.dens.stats;
 import korolev.dens.model.AdmissionCompany;
 import korolev.dens.model.Applicant;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -11,41 +16,41 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-public class AverageScoreCollector implements Collector<AdmissionCompany,
+public class ParallelAvgScoreCollector implements Collector<AdmissionCompany,
         Map<Integer, List<Integer>>,
         Map<Integer, Double>> {
 
     private long delay = 0;
 
-    public AverageScoreCollector(long delay) {
+    public ParallelAvgScoreCollector(long delay) {
         this.delay = delay;
     }
 
-    public AverageScoreCollector() {}
+    public ParallelAvgScoreCollector() {}
 
-    public static AverageScoreCollector toAverageScoreByYears() {
-        return new AverageScoreCollector();
+    public static ParallelAvgScoreCollector toAvgScoreByYears() {
+        return new ParallelAvgScoreCollector();
     }
 
-    public static AverageScoreCollector toAverageScoreByYears(long delay) {
-        return new AverageScoreCollector(delay);
+    public static ParallelAvgScoreCollector toAvgScoreByYears(long delay) {
+        return new ParallelAvgScoreCollector(delay);
     }
 
     @Override
     public Supplier<Map<Integer, List<Integer>>> supplier() {
-        return HashMap::new;
+        return ConcurrentHashMap::new;
     }
 
     @Override
     public BiConsumer<Map<Integer, List<Integer>>, AdmissionCompany> accumulator() {
         return (map, company) -> {
             if (!map.containsKey(company.getYear())) {
-                map.put(company.getYear(), new ArrayList<>());
+                map.put(company.getYear(), new CopyOnWriteArrayList<>());
             }
             map.get(company.getYear()).addAll(
                     (this.delay > 0 ? company.getEducationalPrograms(this.delay) : company.getEducationalPrograms())
-                            .stream().flatMap(
-                            ep -> ep.getApplicants().stream()
+                            .parallelStream().flatMap(
+                            ep -> ep.getApplicants().parallelStream()
                                     .filter(a -> a.getPointsNumber() >= ep.getMinimumPassingScore())
                                     .sorted(Comparator.comparingDouble(
                                             Applicant::getPreviousEducationAverageScore
@@ -60,11 +65,11 @@ public class AverageScoreCollector implements Collector<AdmissionCompany,
     @Override
     public BinaryOperator<Map<Integer, List<Integer>>> combiner() {
         return (map1, map2) -> {
-            map2.forEach((key, value) -> {
-                if (map1.containsKey(key)) {
-                    map1.get(key).addAll(value);
+            map2.entrySet().parallelStream().forEach(entry -> {
+                if (map1.containsKey(entry.getKey())) {
+                    map1.get(entry.getKey()).addAll(entry.getValue());
                 } else {
-                    map1.put(key, value);
+                    map1.put(entry.getKey(), entry.getValue());
                 }
             });
             return map1;
@@ -73,10 +78,10 @@ public class AverageScoreCollector implements Collector<AdmissionCompany,
 
     @Override
     public Function<Map<Integer, List<Integer>>, Map<Integer, Double>> finisher() {
-        return map -> map.entrySet().stream().collect(Collectors.toMap(
-           Map.Entry::getKey,
-           entry -> entry.getValue().stream()
-                   .collect(Collectors.averagingInt(Integer::intValue))
+        return map -> map.entrySet().parallelStream().collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> entry.getValue().parallelStream()
+                        .collect(Collectors.averagingInt(Integer::intValue))
         ));
     }
 
@@ -84,4 +89,5 @@ public class AverageScoreCollector implements Collector<AdmissionCompany,
     public Set<Characteristics> characteristics() {
         return Set.of();
     }
+
 }

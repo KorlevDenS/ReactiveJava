@@ -33,7 +33,7 @@ public class EducationalProgramGenerator {
         int budgetPlacesNumber = 5 + rnd.nextInt(46);
         int contractPlacesNumber = 10 + rnd.nextInt(61);
         int contractCost = 100_000 + rnd.nextInt(900_001);
-        int minimumPassingScore = 40 + rnd.nextInt(21);
+        int minimumPassingScore = 40 + rnd.nextInt(41);
         int concurs = budgetPlacesNumber + rnd.nextInt(budgetPlacesNumber * 9 + 1);
         List<Applicant> applicants = new ArrayList<>();
         for (int i = 0; i < concurs; i++) {

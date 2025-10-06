@@ -9,6 +9,20 @@ import java.util.stream.Collectors;
 
 public class StatsAccumulator {
 
+    public static Map<Integer, Double> calcStatsWithParallelCollector(List<AdmissionCompany> admissionCompanies,
+                                                                      long delay) {
+        return admissionCompanies.parallelStream().collect(ParallelAvgScoreCollector.toAvgScoreByYears(delay));
+    }
+
+    public static Map<Integer, Double> calcStatsWithParallelCollector(List<AdmissionCompany> admissionCompanies) {
+        return admissionCompanies.parallelStream().collect(ParallelAvgScoreCollector.toAvgScoreByYears());
+    }
+
+    public static Map<Integer, Double> calcStatsWithCustomCollector(List<AdmissionCompany> admissionCompanies,
+                                                                    long delay) {
+        return admissionCompanies.stream().collect(AverageScoreCollector.toAverageScoreByYears(delay));
+    }
+
     public static Map<Integer, Double> calcStatsWithCustomCollector(List<AdmissionCompany> admissionCompanies) {
         return admissionCompanies.stream().collect(AverageScoreCollector.toAverageScoreByYears());
     }

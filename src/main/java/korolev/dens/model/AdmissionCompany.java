@@ -4,6 +4,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Data
 @AllArgsConstructor
@@ -18,5 +19,14 @@ public class AdmissionCompany {
     private AdmissionCommission commission;
 
     private List<EducationalProgram> educationalPrograms;
+
+    public List<EducationalProgram> getEducationalPrograms(long delay) {
+        try {
+            TimeUnit.MILLISECONDS.sleep(delay);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        return educationalPrograms;
+    }
 
 }
