@@ -6,8 +6,23 @@ import korolev.dens.model.EducationalProgram;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 public class StatsAccumulator {
+
+
+    public static Map<Integer, Double> calcStatsWithSpliterator(List<AdmissionCompany> admissionCompanies,
+                                                                      long delay) {
+        return StreamSupport.stream(new CompanySpliterator(admissionCompanies), true)
+                .parallel().collect(ParallelAvgScoreCollector.toAvgScoreByYears(delay));
+    }
+
+    public static Map<Integer, Double> calcStatsWithSpliterator(List<AdmissionCompany> admissionCompanies) {
+        return StreamSupport.stream(new CompanySpliterator(admissionCompanies), true)
+                .parallel().collect(ParallelAvgScoreCollector.toAvgScoreByYears());
+    }
+
+
 
     public static Map<Integer, Double> calcStatsWithParallelCollector(List<AdmissionCompany> admissionCompanies,
                                                                       long delay) {

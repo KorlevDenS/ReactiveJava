@@ -11,13 +11,13 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Thread)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @BenchmarkMode(Mode.AverageTime)
-@Warmup(iterations = 2, time = 1, timeUnit = TimeUnit.SECONDS)
-@Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
+@Warmup(iterations = 1, time = 1, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 4, time = 1, timeUnit = TimeUnit.SECONDS)
 public class StatsBenchmark {
 
     public final long DELAY = 5;
 
-    @Param({"150000"})
+    @Param({"1000"})
     private int collectionSize;
 
     private List<AdmissionCompany> admissionCompanies;
@@ -35,12 +35,12 @@ public class StatsBenchmark {
         );
     }
 
-//    @Benchmark
-//    public void delayTrivialCalc(Blackhole bh) {
-//        bh.consume(
-//                StatsAccumulator.calcStatsWithCustomCollector(admissionCompanies, DELAY)
-//        );
-//    }
+    @Benchmark
+    public void delayTrivialCalc(Blackhole bh) {
+        bh.consume(
+                StatsAccumulator.calcStatsWithCustomCollector(admissionCompanies, DELAY)
+        );
+    }
 
     @Benchmark
     public void calcWithParallelCollector(Blackhole bh) {
@@ -49,11 +49,25 @@ public class StatsBenchmark {
         );
     }
 
-//    @Benchmark
-//    public void delayCalcWithParallelCollector(Blackhole bh) {
-//        bh.consume(
-//                StatsAccumulator.calcStatsWithParallelCollector(admissionCompanies, DELAY)
-//        );
-//    }
+    @Benchmark
+    public void delayCalcWithParallelCollector(Blackhole bh) {
+        bh.consume(
+                StatsAccumulator.calcStatsWithParallelCollector(admissionCompanies, DELAY)
+        );
+    }
+
+    @Benchmark
+    public void calcWithSpliterator(Blackhole bh) {
+        bh.consume(
+                StatsAccumulator.calcStatsWithSpliterator(admissionCompanies)
+        );
+    }
+
+    @Benchmark
+    public void delayCalcWithSpliterator(Blackhole bh) {
+        bh.consume(
+                StatsAccumulator.calcStatsWithSpliterator(admissionCompanies, DELAY)
+        );
+    }
 
 }
