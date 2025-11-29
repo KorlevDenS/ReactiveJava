@@ -1,5 +1,7 @@
 package korolev.dens.stats;
 
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import korolev.dens.model.AdmissionCompany;
 import korolev.dens.model.Applicant;
 import korolev.dens.model.EducationalProgram;
@@ -40,6 +42,56 @@ public class StatsAccumulator {
 
     public static Map<Integer, Double> calcStatsWithCustomCollector(List<AdmissionCompany> admissionCompanies) {
         return admissionCompanies.stream().collect(AverageScoreCollector.toAverageScoreByYears());
+    }
+
+    public static Map<Integer, Double> calcStatsWithEmbeddedRxJava(List<AdmissionCompany> admissionCompanies, long delay) {
+        return Observable.fromIterable(admissionCompanies)
+                .groupBy(AdmissionCompany::getYear)
+                .flatMapSingle(group ->
+                        group.observeOn(Schedulers.computation())
+                                .flatMap(company ->
+                                        Observable.fromIterable(company.getEducationalPrograms(delay)).flatMap(program ->
+                                                Observable.fromIterable(program.getApplicants())
+                                                        .filter(a -> a.getPointsNumber() >= program.getMinimumPassingScore())
+                                                        .sorted(Comparator.comparingDouble(Applicant::getPreviousEducationAverageScore).reversed())
+                                                        .sorted(Comparator.comparingInt(Applicant::getPointsNumber).reversed())
+                                                        .take(program.getBudgetPlacesNumber())
+                                        )
+                                ).map(Applicant::getPointsNumber)
+                                .toList()
+                                .map(scores -> scores.stream()
+                                        .collect(Collectors.averagingInt(Integer::intValue))
+                                ).map(avg -> {
+                                    assert group.getKey() != null;
+                                    return Map.entry(group.getKey(), avg);
+                                })
+                ).toMap(Map.Entry::getKey, Map.Entry::getValue)
+                .blockingGet();
+    }
+
+    public static Map<Integer, Double> calcStatsWithEmbeddedRxJava(List<AdmissionCompany> admissionCompanies) {
+        return Observable.fromIterable(admissionCompanies)
+                .groupBy(AdmissionCompany::getYear)
+                .flatMapSingle(group ->
+                        group.observeOn(Schedulers.computation())
+                                .flatMap(company ->
+                                Observable.fromIterable(company.getEducationalPrograms()).flatMap(program ->
+                                        Observable.fromIterable(program.getApplicants())
+                                                .filter(a -> a.getPointsNumber() >= program.getMinimumPassingScore())
+                                                .sorted(Comparator.comparingDouble(Applicant::getPreviousEducationAverageScore).reversed())
+                                                .sorted(Comparator.comparingInt(Applicant::getPointsNumber).reversed())
+                                                .take(program.getBudgetPlacesNumber())
+                                )
+                        ).map(Applicant::getPointsNumber)
+                                .toList()
+                                .map(scores -> scores.stream()
+                                        .collect(Collectors.averagingInt(Integer::intValue))
+                                ).map(avg -> {
+                                    assert group.getKey() != null;
+                                    return Map.entry(group.getKey(), avg);
+                                })
+                ).toMap(Map.Entry::getKey, Map.Entry::getValue)
+                .blockingGet();
     }
 
     public static Map<Integer, Double> calcStatsWithStreamApi(List<AdmissionCompany> admissionCompanies) {

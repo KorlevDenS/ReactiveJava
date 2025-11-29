@@ -29,14 +29,28 @@ public class StatsBenchmark {
     }
 
     @Benchmark
-    public void trivialCalc(Blackhole bh) {
+    public void calcWithStreamApi(Blackhole bh) {
+        bh.consume(
+                StatsAccumulator.calcStatsWithStreamApi(admissionCompanies)
+        );
+    }
+
+    @Benchmark
+    public void calcIterative(Blackhole bh) {
+        bh.consume(
+                StatsAccumulator.calcStatsIterative(admissionCompanies)
+        );
+    }
+
+    @Benchmark
+    public void calcWithCustomCollector(Blackhole bh) {
         bh.consume(
                 StatsAccumulator.calcStatsWithCustomCollector(admissionCompanies)
         );
     }
 
     @Benchmark
-    public void delayTrivialCalc(Blackhole bh) {
+    public void delayCalcWithCustomCollector(Blackhole bh) {
         bh.consume(
                 StatsAccumulator.calcStatsWithCustomCollector(admissionCompanies, DELAY)
         );
@@ -67,6 +81,20 @@ public class StatsBenchmark {
     public void delayCalcWithSpliterator(Blackhole bh) {
         bh.consume(
                 StatsAccumulator.calcStatsWithSpliterator(admissionCompanies, DELAY)
+        );
+    }
+
+    @Benchmark
+    public void calcWithEmbeddedRxJava(Blackhole bh) {
+        bh.consume(
+                StatsAccumulator.calcStatsWithEmbeddedRxJava(admissionCompanies)
+        );
+    }
+
+    @Benchmark
+    public void delayCalcWithEmbeddedRxJava(Blackhole bh) {
+        bh.consume(
+                StatsAccumulator.calcStatsWithEmbeddedRxJava(admissionCompanies, DELAY)
         );
     }
 
