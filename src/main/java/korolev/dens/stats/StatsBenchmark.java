@@ -85,6 +85,13 @@ public class StatsBenchmark {
 //    }
 
     @Benchmark
+    public void calcWithRxJavaSubscriber(Blackhole bh) {
+        bh.consume(
+                StatsAccumulator.calcStatsWithRxJavaSubscriber(admissionCompanies)
+        );
+    }
+
+    @Benchmark
     public void calcWithEmbeddedRxJava(Blackhole bh) {
         bh.consume(
                 StatsAccumulator.calcStatsWithEmbeddedRxJava(admissionCompanies)

@@ -9,19 +9,15 @@ import korolev.dens.model.Applicant;
 import lombok.Getter;
 import org.reactivestreams.Subscription;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
 
 public class AvgScoreSubscriber implements FlowableSubscriber<AdmissionCompany> {
 
     private Subscription subscription;
-    private final Map<Integer, List<Double>> passedByYears = new ConcurrentHashMap<>();
+    private final Map<Integer, List<Integer>> passedByYears = new ConcurrentHashMap<>();
     @Getter
     private final CompletableFuture<Map<Integer, Double>> future = new CompletableFuture<>();
 
@@ -43,28 +39,35 @@ public class AvgScoreSubscriber implements FlowableSubscriber<AdmissionCompany> 
                                 .take(p.getBudgetPlacesNumber())
                         )
                 ).map(Applicant::getPointsNumber).toList().blockingGet();
-
         if (!passedByYears.containsKey(item.getYear())) {
             passedByYears.put(item.getYear(), new CopyOnWriteArrayList<>());
         }
-//        if (item % 2 == 0) {
-//            sum += item;
-//            count++;
-//        }
-        // Запрашиваем следующий элемент (по одному)
+        passedByYears.get(item.getYear()).addAll(avgS);
         subscription.request(1);
     }
 
     @Override
     public void onError(Throwable throwable) {
         System.err.println("Error: " + throwable.getMessage());
+        future.completeExceptionally(throwable);
     }
 
     @Override
     public void onComplete() {
-
-        //double avg = count == 0 ? 0 : (double) sum / count;
-        //future.complete(avg);
+        Map<Integer, Double> result =
+                Observable.fromIterable(passedByYears.entrySet())
+                        .map(entry -> {
+                            List<Integer> values = entry.getValue();
+                            double avg = values.stream()
+                                    .mapToDouble(Integer::doubleValue)
+                                    .average()
+                                    .orElse(0.0);
+                            return new AbstractMap.SimpleEntry<>(entry.getKey(), avg);
+                        }).toMap(
+                                AbstractMap.SimpleEntry::getKey,
+                                AbstractMap.SimpleEntry::getValue
+                        ).blockingGet();
+        future.complete(result);
     }
 
 }

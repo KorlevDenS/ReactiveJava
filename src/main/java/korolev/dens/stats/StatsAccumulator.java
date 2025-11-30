@@ -1,5 +1,7 @@
 package korolev.dens.stats;
 
+import io.reactivex.rxjava3.core.BackpressureStrategy;
+import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import korolev.dens.model.AdmissionCompany;
@@ -41,6 +43,18 @@ public class StatsAccumulator {
 
     public static Map<Integer, Double> calcStatsWithCustomCollector(List<AdmissionCompany> admissionCompanies) {
         return admissionCompanies.stream().collect(AverageScoreCollector.toAverageScoreByYears());
+    }
+
+    public static Map<Integer, Double> calcStatsWithRxJavaSubscriber(List<AdmissionCompany> admissionCompanies) {
+        AvgScoreSubscriber scoreSubscriber = new AvgScoreSubscriber();
+        Flowable<AdmissionCompany> flowable = Flowable.create(emitter -> {
+            for (AdmissionCompany item : admissionCompanies) {
+                emitter.onNext(item);
+            }
+            emitter.onComplete();
+        }, BackpressureStrategy.BUFFER);
+        flowable.subscribeOn(Schedulers.computation()).observeOn(Schedulers.io()).subscribe(scoreSubscriber);
+        return scoreSubscriber.getFuture().join();
     }
 
     public static Map<Integer, Double> calcStatsWithEmbeddedRxJava(List<AdmissionCompany> admissionCompanies, long delay) {

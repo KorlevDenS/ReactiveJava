@@ -52,26 +52,13 @@ public class Main {
 //        printResults("RxJava", StatsAccumulator.calcStatsWithEmbeddedRxJava(admissionCompanies), 1);
 //
 //        printResults("StreamApi", StatsAccumulator.calcStatsWithStreamApi(admissionCompanies), 1);
-
-        AvgScoreSubscriber scoreSubscriber = new AvgScoreSubscriber();
-        List<Integer> someList = List.of(2, 22, 30, 99, 13, 432, 67, 78, 21, 22, 3900, 78, 0);
-
-        Flowable<Integer> flowable = Flowable.create(emitter -> {
-            for (Integer integer : someList) {
-                emitter.onNext(integer);
-            }
-            emitter.onComplete();
-        }, BackpressureStrategy.BUFFER);
-
-        flowable.subscribe(scoreSubscriber);
-
-        System.out.println(scoreSubscriber.getFuture().join());
-
-//        new Runner(new OptionsBuilder()
-//                .include(StatsBenchmark.class.getSimpleName())
-//                .forks(1)
-//                .build()
-//        ).run();
+//
+//        printResults("Subscriber", StatsAccumulator.calcStatsWithRxJavaSubscriber(admissionCompanies), 1);
+        new Runner(new OptionsBuilder()
+                .include(StatsBenchmark.class.getSimpleName())
+                .forks(1)
+                .build()
+        ).run();
 
     }
 
