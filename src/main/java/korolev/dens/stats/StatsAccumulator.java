@@ -14,7 +14,7 @@ public class StatsAccumulator {
 
 
     public static Map<Integer, Double> calcStatsWithSpliterator(List<AdmissionCompany> admissionCompanies,
-                                                                      long delay) {
+                                                                long delay) {
         return StreamSupport.stream(new CompanySpliterator(admissionCompanies), true)
                 .parallel().collect(ParallelAvgScoreCollector.toAvgScoreByYears(delay));
     }
@@ -23,7 +23,6 @@ public class StatsAccumulator {
         return StreamSupport.stream(new CompanySpliterator(admissionCompanies), true)
                 .parallel().collect(ParallelAvgScoreCollector.toAvgScoreByYears());
     }
-
 
 
     public static Map<Integer, Double> calcStatsWithParallelCollector(List<AdmissionCompany> admissionCompanies,
@@ -48,14 +47,16 @@ public class StatsAccumulator {
         return Observable.fromIterable(admissionCompanies)
                 .groupBy(AdmissionCompany::getYear)
                 .flatMapSingle(group ->
-                        group.observeOn(Schedulers.computation())
-                                .flatMap(company ->
-                                        Observable.fromIterable(company.getEducationalPrograms(delay)).flatMap(program ->
-                                                Observable.fromIterable(program.getApplicants())
+                        group//.observeOn(Schedulers.computation())
+                                .flatMap(company -> Observable.just(company)
+                                        .subscribeOn(Schedulers.computation())
+                                        .flatMap(comp -> Observable.fromIterable(comp.getEducationalPrograms(delay))
+                                                .flatMap(program -> Observable.fromIterable(program.getApplicants())
                                                         .filter(a -> a.getPointsNumber() >= program.getMinimumPassingScore())
                                                         .sorted(Comparator.comparingDouble(Applicant::getPreviousEducationAverageScore).reversed())
                                                         .sorted(Comparator.comparingInt(Applicant::getPointsNumber).reversed())
                                                         .take(program.getBudgetPlacesNumber())
+                                                )
                                         )
                                 ).map(Applicant::getPointsNumber)
                                 .toList()
@@ -73,16 +74,18 @@ public class StatsAccumulator {
         return Observable.fromIterable(admissionCompanies)
                 .groupBy(AdmissionCompany::getYear)
                 .flatMapSingle(group ->
-                        group.observeOn(Schedulers.computation())
-                                .flatMap(company ->
-                                Observable.fromIterable(company.getEducationalPrograms()).flatMap(program ->
-                                        Observable.fromIterable(program.getApplicants())
-                                                .filter(a -> a.getPointsNumber() >= program.getMinimumPassingScore())
-                                                .sorted(Comparator.comparingDouble(Applicant::getPreviousEducationAverageScore).reversed())
-                                                .sorted(Comparator.comparingInt(Applicant::getPointsNumber).reversed())
-                                                .take(program.getBudgetPlacesNumber())
-                                )
-                        ).map(Applicant::getPointsNumber)
+                        group//.observeOn(Schedulers.computation())
+                                .flatMap(company -> Observable.just(company)
+                                        .subscribeOn(Schedulers.computation())
+                                        .flatMap(comp -> Observable.fromIterable(comp.getEducationalPrograms())
+                                                .flatMap(program -> Observable.fromIterable(program.getApplicants())
+                                                        .filter(a -> a.getPointsNumber() >= program.getMinimumPassingScore())
+                                                        .sorted(Comparator.comparingDouble(Applicant::getPreviousEducationAverageScore).reversed())
+                                                        .sorted(Comparator.comparingInt(Applicant::getPointsNumber).reversed())
+                                                        .take(program.getBudgetPlacesNumber())
+                                                )
+                                        )
+                                ).map(Applicant::getPointsNumber)
                                 .toList()
                                 .map(scores -> scores.stream()
                                         .collect(Collectors.averagingInt(Integer::intValue))
