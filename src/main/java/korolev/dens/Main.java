@@ -47,7 +47,7 @@ public class Main {
 
     static void main() throws RunnerException {
 
-//        List<AdmissionCompany> admissionCompanies = AdmissionCompanyGenerator.generate(1000);
+//        List<AdmissionCompany> admissionCompanies = AdmissionCompanyGenerator.generate(50000);
 //
 //        printResults("RxJava", StatsAccumulator.calcStatsWithEmbeddedRxJava(admissionCompanies), 1);
 //

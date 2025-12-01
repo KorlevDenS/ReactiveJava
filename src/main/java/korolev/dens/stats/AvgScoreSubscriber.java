@@ -3,7 +3,6 @@ package korolev.dens.stats;
 import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.FlowableSubscriber;
 import io.reactivex.rxjava3.core.Observable;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 import korolev.dens.model.AdmissionCompany;
 import korolev.dens.model.Applicant;
 import lombok.Getter;
@@ -30,14 +29,11 @@ public class AvgScoreSubscriber implements FlowableSubscriber<AdmissionCompany> 
     @Override
     public void onNext(AdmissionCompany item) {
         List<Integer> avgS = Observable.fromIterable(item.getEducationalPrograms())
-                .flatMap(program -> Observable.just(program)
-                        .subscribeOn(Schedulers.computation())
-                        .flatMap(p -> Observable.fromIterable(p.getApplicants())
+                .flatMap(p -> Observable.fromIterable(p.getApplicants())
                                 .filter(a -> a.getPointsNumber() >= p.getMinimumPassingScore())
                                 .sorted(Comparator.comparingDouble(Applicant::getPreviousEducationAverageScore).reversed())
                                 .sorted(Comparator.comparingInt(Applicant::getPointsNumber).reversed())
                                 .take(p.getBudgetPlacesNumber())
-                        )
                 ).map(Applicant::getPointsNumber).toList().blockingGet();
         if (!passedByYears.containsKey(item.getYear())) {
             passedByYears.put(item.getYear(), new CopyOnWriteArrayList<>());

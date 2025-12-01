@@ -53,7 +53,19 @@ public class StatsAccumulator {
             }
             emitter.onComplete();
         }, BackpressureStrategy.BUFFER);
-        flowable.subscribeOn(Schedulers.computation()).observeOn(Schedulers.io()).subscribe(scoreSubscriber);
+        flowable
+                .parallel(4)
+                .runOn(Schedulers.computation())
+//                .doOnNext(o -> {
+//                    Thread current = Thread.currentThread();
+//                    System.out.println("Thread after parallel: " + current.getName());
+//                })
+                .sequential()
+//                .doOnNext(o -> {
+//                    Thread current = Thread.currentThread();
+//                    System.out.println("Thread after sequential: " + current.getName());
+//                })
+                .subscribe(scoreSubscriber);
         return scoreSubscriber.getFuture().join();
     }
 
@@ -61,8 +73,7 @@ public class StatsAccumulator {
         return Observable.fromIterable(admissionCompanies)
                 .groupBy(AdmissionCompany::getYear)
                 .flatMapSingle(group ->
-                        group//.observeOn(Schedulers.computation())
-                                .flatMap(company -> Observable.just(company)
+                        group.flatMap(company -> Observable.just(company)
                                         .subscribeOn(Schedulers.computation())
                                         .flatMap(comp -> Observable.fromIterable(comp.getEducationalPrograms(delay))
                                                 .flatMap(program -> Observable.fromIterable(program.getApplicants())
@@ -88,8 +99,7 @@ public class StatsAccumulator {
         return Observable.fromIterable(admissionCompanies)
                 .groupBy(AdmissionCompany::getYear)
                 .flatMapSingle(group ->
-                        group//.observeOn(Schedulers.computation())
-                                .flatMap(company -> Observable.just(company)
+                        group.flatMap(company -> Observable.just(company)
                                         .subscribeOn(Schedulers.computation())
                                         .flatMap(comp -> Observable.fromIterable(comp.getEducationalPrograms())
                                                 .flatMap(program -> Observable.fromIterable(program.getApplicants())

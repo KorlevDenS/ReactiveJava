@@ -17,7 +17,7 @@ public class StatsBenchmark {
 
     public final long DELAY = 5;
 
-    @Param({"1000"})
+    @Param({"10000"})
     private int collectionSize;
 
     private List<AdmissionCompany> admissionCompanies;
@@ -28,33 +28,33 @@ public class StatsBenchmark {
         admissionCompanies = AdmissionCompanyGenerator.generate(collectionSize);
     }
 
-//    @Benchmark
-//    public void calcWithStreamApi(Blackhole bh) {
-//        bh.consume(
-//                StatsAccumulator.calcStatsWithStreamApi(admissionCompanies)
-//        );
-//    }
-//
-//    @Benchmark
-//    public void calcIterative(Blackhole bh) {
-//        bh.consume(
-//                StatsAccumulator.calcStatsIterative(admissionCompanies)
-//        );
-//    }
-//
-//    @Benchmark
-//    public void calcWithCustomCollector(Blackhole bh) {
-//        bh.consume(
-//                StatsAccumulator.calcStatsWithCustomCollector(admissionCompanies)
-//        );
-//    }
-//
-//    @Benchmark
-//    public void delayCalcWithCustomCollector(Blackhole bh) {
-//        bh.consume(
-//                StatsAccumulator.calcStatsWithCustomCollector(admissionCompanies, DELAY)
-//        );
-//    }
+    @Benchmark
+    public void calcWithStreamApi(Blackhole bh) {
+        bh.consume(
+                StatsAccumulator.calcStatsWithStreamApi(admissionCompanies)
+        );
+    }
+
+    @Benchmark
+    public void calcIterative(Blackhole bh) {
+        bh.consume(
+                StatsAccumulator.calcStatsIterative(admissionCompanies)
+        );
+    }
+
+    @Benchmark
+    public void calcWithCustomCollector(Blackhole bh) {
+        bh.consume(
+                StatsAccumulator.calcStatsWithCustomCollector(admissionCompanies)
+        );
+    }
+
+    @Benchmark
+    public void delayCalcWithCustomCollector(Blackhole bh) {
+        bh.consume(
+                StatsAccumulator.calcStatsWithCustomCollector(admissionCompanies, DELAY)
+        );
+    }
 
     @Benchmark
     public void calcWithParallelCollector(Blackhole bh) {
@@ -70,19 +70,19 @@ public class StatsBenchmark {
         );
     }
 
-//    @Benchmark
-//    public void calcWithSpliterator(Blackhole bh) {
-//        bh.consume(
-//                StatsAccumulator.calcStatsWithSpliterator(admissionCompanies)
-//        );
-//    }
-//
-//    @Benchmark
-//    public void delayCalcWithSpliterator(Blackhole bh) {
-//        bh.consume(
-//                StatsAccumulator.calcStatsWithSpliterator(admissionCompanies, DELAY)
-//        );
-//    }
+    @Benchmark
+    public void calcWithSpliterator(Blackhole bh) {
+        bh.consume(
+                StatsAccumulator.calcStatsWithSpliterator(admissionCompanies)
+        );
+    }
+
+    @Benchmark
+    public void delayCalcWithSpliterator(Blackhole bh) {
+        bh.consume(
+                StatsAccumulator.calcStatsWithSpliterator(admissionCompanies, DELAY)
+        );
+    }
 
     @Benchmark
     public void calcWithRxJavaSubscriber(Blackhole bh) {
